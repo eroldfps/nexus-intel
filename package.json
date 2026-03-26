@@ -1,0 +1,35 @@
+{
+  "name": "nexus-intel",
+  "version": "1.0.0",
+  "description": "NEXUS INTEL",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "rss-parser": "^3.13.0",
+    "node-fetch": "^2.7.0"
+  }
+}
+```
+4. Commit
+
+**File 4: `.env.example`**
+1. **"Add file"** → **"Create new file"**
+2. Filename: `.env.example`
+3. Paste:
+```
+PORT=3000
+CRAWL_INTERVAL=30
+MAX_NEWS_ITEMS=200
+```
+4. Commit
+
+Do them one at a time. After all 4 are done your repo should show:
+```
+public/        ← folder
+server/        ← folder
+.env.example
+package.json
+README.md
