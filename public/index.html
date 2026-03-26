@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NEXUS INTEL</title>
+<script src="https://js.puter.com/v2/"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg0:#06060b;--bg1:#0b0b14;--bg2:#10101c;--bg3:#161625;--border:#1a1a2e;--bhi:#252540;--tx0:#eaeaf2;--tx1:#c0c0d0;--tx2:#8888a0;--tx3:#555570;--tx4:#3a3a50;--accent:#00e5ff;--red:#ff3b5c;--amber:#ffb020;--purple:#b388ff;--green:#00e676;--mono:'IBM Plex Mono',monospace;--body:'Outfit',sans-serif}
+html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--tx1);font-family:var(--body)}
+button{font-family:var(--mono);cursor:pointer;border:none;background:none;transition:all .15s;color:var(--tx4)}
+button:hover{opacity:.8}
+::selection{background:var(--accent);color:var(--bg0)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bhi);border-radius:3px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+#app{display:flex;flex-direction:column;height:100vh}
+
+/* Topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:42px;border-bottom:1px solid var(--border);background:var(--bg1);flex-shrink:0}
+.topbar-l{display:flex;align-items:center;gap:12px}
+.topbar-r{display:flex;align-items:center;gap:8px}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red);animation:pulse 1.5s infinite}
+.logo{font:500 13px/1 var(--mono);color:var(--tx0);letter-spacing:.2em}
+.tag{font:300 8px/1 var(--mono);color:var(--red);letter-spacing:.1em}
+.sm{font:300 7px/1 var(--mono);color:var(--tx4)}
+.btn-sm{font:400 7px/1 var(--mono);padding:3px 10px;border:1px solid var(--accent)!important;color:var(--accent);letter-spacing:.08em}
+.btn-sm.off{border-color:var(--tx4)!important;color:var(--tx4)}
+
+/* Topic bar */
+.tbar{display:flex;align-items:center;gap:4px;padding:0 16px;height:34px;border-bottom:1px solid var(--border);background:var(--bg1);flex-shrink:0;overflow-x:auto}
+.tbar .lbl{font:400 7px/1 var(--mono);color:var(--tx4);letter-spacing:.12em;margin-right:6px;white-space:nowrap}
+.tbtn{font:400 8px/1 var(--mono);padding:4px 10px;border:1px solid var(--border)!important;white-space:nowrap;border-radius:2px}
+.tbtn.on{border-color:var(--accent)!important;color:var(--accent);background:rgba(0,229,255,.06)}
+.tbtn.custom{border-color:var(--purple)!important;color:var(--purple)}
+.tbtn.custom.on{background:rgba(179,136,255,.06)}
+.btn-add{font:500 9px/1 var(--mono);padding:4px 8px;border:1px solid var(--bhi)!important;color:var(--tx3)}
+
+/* Region tabs */
+.rtabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.rtab{flex:1;padding:7px 0;font:400 7px/1 var(--mono);letter-spacing:.1em;text-align:center;border-bottom:2px solid transparent}
+.rtab.on{color:var(--accent);border-bottom-color:var(--accent);background:var(--bg2)}
+
+/* Main grid */
+.main{display:grid;grid-template-columns:300px 1fr 280px;flex:1;overflow:hidden}
+
+/* Feed */
+.pnl-feed{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.feed-hdr{padding:8px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sec-lbl{font:400 7px/1 var(--mono);color:var(--tx4);letter-spacing:.12em;margin-bottom:5px}
+.heatmap{display:grid;gap:2px}
+.hm-c{height:18px;display:flex;align-items:center;justify-content:center;border-radius:2px;font:500 7px/1 var(--mono);color:#fff}
+.feed-list{flex:1;overflow-y:auto}
+
+/* News card */
+.ncard{padding:9px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;animation:fadeIn .3s ease}
+.ncard:hover{background:var(--bg2)}
+.ncard.sel{background:var(--bg3)}
+.ncard-top{display:flex;justify-content:space-between;margin-bottom:4px}
+.ncard-cat{font:400 7px/1 var(--mono);letter-spacing:.08em}
+.ncard-time{font:300 7px/1 var(--mono);color:var(--tx4)}
+.ncard-title{font:400 11px/1.45 var(--body);color:var(--tx1);margin-bottom:4px}
+.ncard-bot{display:flex;justify-content:space-between;align-items:center}
+.ncard-src{font:300 7px/1 var(--mono);color:var(--tx3)}
+.pips{display:flex;gap:1px}
+.pip{width:2.5px;height:6px;border-radius:1px}
+.ncard-exp{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);animation:fadeIn .2s ease}
+.ncard-summary{font:300 9px/1.5 var(--body);color:var(--tx2);margin-bottom:8px}
+.ncard-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.btn-source{font:400 7px/1 var(--mono);color:var(--accent);padding:3px 8px;border:1px solid var(--accent)!important;border-radius:2px;background:transparent}
+.conn-tag{font:400 6px/1 var(--mono);padding:2px 5px;border-radius:2px}
+.ncard-hint{margin-top:3px;font:300 6px/1 var(--mono);color:var(--tx4);opacity:.5}
+
+/* Center */
+.pnl-ctr{display:flex;flex-direction:column;overflow:hidden}
+.ctabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.ctab{flex:1;padding:8px 0;font:400 8px/1 var(--mono);letter-spacing:.12em;text-align:center;border-bottom:2px solid transparent}
+.ctab.on{color:var(--accent);border-bottom-color:var(--accent);background:var(--bg2)}
+.graph-wrap{flex:1;position:relative;overflow:hidden}
+#graphCanvas{display:block;width:100%;height:100%}
+.g-legend{position:absolute;bottom:8px;left:10px;display:flex;gap:8px;flex-wrap:wrap}
+.g-leg{display:flex;align-items:center;gap:3px}
+.g-dot{width:5px;height:5px;border-radius:50%}
+.g-info{position:absolute;bottom:8px;right:10px;font:300 7px/1 var(--mono);color:var(--tx4)}
+
+/* Node popup */
+.npop{position:absolute;top:10px;right:10px;width:260px;background:rgba(11,11,20,.95);border:1px solid var(--bhi);padding:14px;backdrop-filter:blur(12px);border-radius:4px;display:none;animation:fadeIn .2s ease}
+.npop.vis{display:block}
+.npop-close{position:absolute;top:6px;right:8px;color:var(--tx3);font-size:14px}
+.npop-cat{font:400 7px/1 var(--mono);letter-spacing:.1em;margin-bottom:5px}
+.npop-title{font:500 11px/1.4 var(--body);color:var(--tx0);margin-bottom:5px}
+.npop-summary{font:300 9px/1.45 var(--body);color:var(--tx2);margin-bottom:6px}
+.npop-meta{font:300 7px/1 var(--mono);color:var(--tx3)}
+.npop-conns{margin-top:6px;padding-top:6px;border-top:1px solid var(--border)}
+
+/* Analysis panel */
+.analysis{flex:1;overflow-y:auto;padding:16px;display:none}
+.analysis.vis{display:block}
+.ana-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.btn-ana{font:400 8px/1 var(--mono);padding:4px 12px;border:1px solid var(--accent)!important;color:var(--accent);border-radius:2px}
+.btn-ana.off{border-color:var(--tx4)!important;color:var(--tx4);cursor:not-allowed}
+.ana-text{font:400 10px/1.85 var(--mono);color:var(--tx2);white-space:pre-wrap;padding:14px;background:var(--bg1);border:1px solid var(--border);border-radius:4px;min-height:200px}
+
+/* Right: Predict */
+.pnl-right{border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--bg1)}
+.pred-hdr{padding:12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.btn-pred{width:100%;padding:10px;font:500 9px/1 var(--mono);letter-spacing:.12em;border:1px solid var(--purple)!important;color:var(--purple);background:linear-gradient(135deg,var(--bg3),var(--bg2));border-radius:3px}
+.btn-pred.off{border-color:var(--tx4)!important;color:var(--tx4);cursor:not-allowed}
+.pred-body{flex:1;overflow-y:auto;padding:12px}
+.pred-text{font:400 9.5px/1.8 var(--mono);color:var(--tx2);white-space:pre-wrap}
+.pred-ph{text-align:center;padding:30px 14px}
+.pred-ph .ico{font-size:28px;margin-bottom:8px;opacity:.2}
+.pred-ph .txt{font:300 8px/1.8 var(--mono);color:var(--tx4)}
+.stats{padding:10px;border-top:1px solid var(--border);flex-shrink:0}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.stat{background:var(--bg2);padding:6px;border:1px solid var(--border);border-radius:2px}
+.stat-l{font:300 6px/1 var(--mono);color:var(--tx4);margin-bottom:3px}
+.stat-v{font:500 14px/1 var(--mono);color:var(--accent)}
+
+/* Status bar */
+.sbar{display:flex;align-items:center;gap:10px;padding:0 16px;height:22px;border-top:1px solid var(--border);background:var(--bg1);flex-shrink:0}
+.sb{font:300 7px/1 var(--mono);color:var(--tx4);display:flex;align-items:center;gap:3px}
+.sb-dot{width:4px;height:4px;border-radius:50%}
+.spacer{flex:1}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;display:none}
+.modal-bg.vis{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--bhi);border-radius:6px;padding:20px;width:380px;max-width:90vw}
+.modal h3{font:600 14px/1 var(--body);color:var(--tx0);margin-bottom:12px}
+.modal label{font:400 9px/1 var(--mono);color:var(--tx3);display:block;margin-bottom:4px}
+.modal input{width:100%;padding:8px 10px;background:var(--bg1);border:1px solid var(--border);color:var(--tx1);font:400 11px/1 var(--body);border-radius:3px;margin-bottom:12px;outline:none}
+.modal input:focus{border-color:var(--accent)}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end}
+.modal .btn-ok{font:500 9px/1 var(--mono);padding:6px 16px;background:var(--accent);color:var(--bg0);border-radius:3px}
+.modal .btn-cancel{font:400 9px/1 var(--mono);padding:6px 16px;border:1px solid var(--border)!important;border-radius:3px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-l">
+      <div class="live-dot" id="liveDot"></div>
+      <span class="logo">NEXUS INTEL</span>
+      <span class="tag" id="topicTag">● LOADING</span>
+    </div>
+    <div class="topbar-r">
+      <span class="sm" id="crawlStatus"></span>
+      <span class="sm" id="aiStatus">AI: —</span>
+      <span class="sm" id="itemCount">0 items</span>
+      <button class="btn-sm" id="btnPause" onclick="toggleCrawl()">■ PAUSE</button>
+    </div>
+  </div>
+
+  <div class="tbar" id="topicBar">
+    <span class="lbl">TOPIC:</span>
+  </div>
+
+  <div class="rtabs" id="regionTabs"></div>
+
+  <div class="main">
+    <div class="pnl-feed">
+      <div class="feed-hdr">
+        <div class="sec-lbl" id="feedLbl">FEED — 0 ITEMS</div>
+        <div class="heatmap" id="heatmap"></div>
+      </div>
+      <div class="feed-list" id="feedList"></div>
+    </div>
+
+    <div class="pnl-ctr">
+      <div class="ctabs">
+        <button class="ctab on" data-tab="graph" onclick="setTab(this)">CONNECTION MAP</button>
+        <button class="ctab" data-tab="summary" onclick="setTab(this)">AI SUMMARY</button>
+      </div>
+      <div class="graph-wrap" id="graphWrap">
+        <canvas id="graphCanvas"></canvas>
+        <div class="g-legend" id="legend"></div>
+        <div class="g-info">scroll=zoom · shift+drag=pan · dashed=unconnected</div>
+        <div class="npop" id="npop">
+          <button class="npop-close" onclick="deselect()">×</button>
+          <div class="npop-cat" id="npCat"></div>
+          <div class="npop-title" id="npTitle"></div>
+          <div class="npop-summary" id="npSummary"></div>
+          <div class="npop-meta" id="npMeta"></div>
+          <div><button class="btn-source" id="npSource" onclick="openSource()" style="margin-top:6px;display:none">↗ OPEN SOURCE</button></div>
+          <div class="npop-conns" id="npConns"></div>
+        </div>
+      </div>
+      <div class="analysis" id="analysisPanel">
+        <div class="ana-hdr">
+          <div class="sec-lbl" id="anaLabel">AI BRIEFING</div>
+          <button class="btn-ana" id="btnAna" onclick="runSummary()">⟳ SUMMARIZE</button>
+        </div>
+        <div class="ana-text" id="anaText">Select a topic and click SUMMARIZE to generate an AI intelligence briefing.
+
+The AI will:
+• Summarize what has happened so far
+• Highlight new developments since you last checked
+• Show how new events connect to previous ones
+• Give key takeaways
+
+Select a region tab to focus the briefing.</div>
+      </div>
+    </div>
+
+    <div class="pnl-right">
+      <div class="pred-hdr">
+        <div class="sec-lbl">AI PREDICTION ENGINE</div>
+        <button class="btn-pred" id="btnPred" onclick="runPredict()">⚡ GENERATE PREDICTION</button>
+      </div>
+      <div class="pred-body" id="predBody">
+        <div class="pred-ph" id="predPh">
+          <div class="ico">◈</div>
+          <div class="txt">Structured AI predictions with<br>scenario matrix &amp; probabilities<br><br>Powered by Grok AI (free)<br>10 uses per day</div>
+        </div>
+        <div class="pred-text" id="predText" style="display:none"></div>
+      </div>
+      <div class="stats">
+        <div class="sec-lbl" style="margin-bottom:6px">METRICS</div>
+        <div class="stats-grid">
+          <div class="stat"><div class="stat-l">ITEMS</div><div class="stat-v" id="sI">0</div></div>
+          <div class="stat"><div class="stat-l">SOURCES</div><div class="stat-v" id="sS">0</div></div>
+          <div class="stat"><div class="stat-l">AVG IMPACT</div><div class="stat-v" id="sA">—</div></div>
+          <div class="stat"><div class="stat-l">REGIONS</div><div class="stat-v" id="sR">0</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sbar">
+    <div class="sb"><div class="sb-dot" id="sbDot" style="background:var(--green)"></div><span id="sbCrawl">CRAWL 30s</span></div>
+    <div class="sb" id="sbRegion">Region: All</div>
+    <div class="sb" id="sbNodes">0 nodes</div>
+    <div class="spacer"></div>
+    <div class="sb" id="sbLast">Awaiting first crawl...</div>
+  </div>
+</div>
+
+<!-- Add Topic Modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3>+ Create Custom Investigation</h3>
+    <label>TOPIC NAME</label>
+    <input type="text" id="topicName" placeholder="e.g. Epstein Files" />
+    <label>KEYWORDS (comma-separated — news matching these get pulled in)</label>
+    <input type="text" id="topicKeywords" placeholder="e.g. epstein, ghislaine maxwell, jeffrey epstein, trafficking" />
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">CANCEL</button>
+      <button class="btn-ok" onclick="createTopic()">CREATE</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ───
+const CATS = {
+  CONFLICT:{label:"CONFLICT",color:"#ff3b5c",icon:"⚔"},
+  ENERGY:{label:"ENERGY",color:"#ffb020",icon:"⛽"},
+  MARKETS:{label:"MARKETS",color:"#00e5ff",icon:"📈"},
+  DIPLOMACY:{label:"DIPLOMACY",color:"#b388ff",icon:"🤝"},
+  SANCTIONS:{label:"SANCTIONS",color:"#ff8a50",icon:"🚫"},
+  HUMANITARIAN:{label:"HUMANITARIAN",color:"#ff6b8a",icon:"🏥"},
+  CYBER:{label:"CYBER",color:"#00e676",icon:"💻"},
+  CIVIL_UNREST:{label:"CIVIL UNREST",color:"#ffd740",icon:"🔥"},
+};
+const CAT_KEYS = Object.keys(CATS);
+const REGIONS = ["All","Middle East","Europe","Asia-Pacific","North America","Global"];
+
+// ─── STATE ───
+let news = [];
+let topics = [];
+let activeTopic = null;
+let selected = null;
+let expanded = null;
+let regionFilter = "All";
+let activeTab = "graph";
+let crawlActive = true;
+let pollTimer = null;
+let aiRemaining = 10;
+
+// ─── GRAPH STATE ───
+let graphNodes = [];
+let graphEdges = [];
+let view = { x: 0, y: 0, zoom: 1 };
+let drag = { on: false, lx: 0, ly: 0 };
+let hover = null;
+let canvasW = 800, canvasH = 500;
+let frameId = null;
+
+// ─── API CALLS ───
+async function api(path, opts = {}) {
+  try {
+    const res = await fetch(path, { headers: { "Content-Type": "application/json" }, ...opts });
+    return await res.json();
+  } catch (e) { console.error("API:", e); return null; }
+}
+
+// ─── POLLING ───
+async function poll() {
+  const params = new URLSearchParams();
+  if (regionFilter !== "All") params.set("region", regionFilter);
+  const data = await api(`/api/news?${params}`);
+  if (data) {
+    const oldCount = news.length;
+    news = data.items || [];
+    if (data.lastCrawl) document.getElementById("sbLast").textContent = "Last crawl: " + new Date(data.lastCrawl).toLocaleTimeString();
+    document.getElementById("itemCount").textContent = data.total + " items";
+    if (news.length !== oldCount) { computeGraph(); render(); }
+  }
+  const ai = await api("/api/ai/status");
+  if (ai) { aiRemaining = ai.remaining; document.getElementById("aiStatus").textContent = `AI: ${ai.remaining}/${ai.limit}`; }
+}
+
+function startPolling() {
+  poll();
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(poll, 5000); // Poll server every 5s
+}
+
+// ─── TOPICS ───
+async function loadTopics() {
+  const data = await api("/api/topics");
+  if (!data) return;
+  topics = data.topics;
+  activeTopic = data.active;
+  renderTopicBar();
+}
+
+async function switchTopic(id) {
+  await api("/api/topics/activate", { method: "POST", body: JSON.stringify({ topicId: id }) });
+  activeTopic = id;
+  news = [];
+  graphNodes = []; graphEdges = [];
+  render();
+  loadTopics();
+  poll();
+}
+
+function renderTopicBar() {
+  const bar = document.getElementById("topicBar");
+  let h = '<span class="lbl">TOPIC:</span>';
+  topics.forEach(t => {
+    const on = t.id === activeTopic;
+    const cls = t.type === "custom" ? "tbtn custom" : "tbtn";
+    h += `<button class="${cls}${on?" on":""}" onclick="switchTopic('${t.id}')">${t.name.toUpperCase()}</button>`;
+  });
+  h += `<button class="btn-add" onclick="openModal()">+ CUSTOM</button>`;
+  bar.innerHTML = h;
+  const active = topics.find(t => t.id === activeTopic);
+  document.getElementById("topicTag").textContent = active ? `● ${active.name.toUpperCase()}` : "● SELECT TOPIC";
+}
+
+function openModal() { document.getElementById("modalBg").classList.add("vis"); }
+function closeModal() { document.getElementById("modalBg").classList.remove("vis"); }
+
+async function createTopic() {
+  const name = document.getElementById("topicName").value.trim();
+  const kw = document.getElementById("topicKeywords").value.split(",").map(s=>s.trim()).filter(Boolean);
+  if (!name || !kw.length) return alert("Need a name and at least one keyword");
+  const data = await api("/api/topics/custom", { method: "POST", body: JSON.stringify({ name, keywords: kw }) });
+  if (data?.ok) {
+    closeModal();
+    document.getElementById("topicName").value = "";
+    document.getElementById("topicKeywords").value = "";
+    await loadTopics();
+    switchTopic(data.topic.id);
+  }
+}
+
+// ─── REGION TABS ───
+function renderRegionTabs() {
+  const el = document.getElementById("regionTabs");
+  el.innerHTML = REGIONS.map(r =>
+    `<button class="rtab${regionFilter===r?" on":""}" onclick="setRegion('${r}')">${r.toUpperCase()}</button>`
+  ).join("");
+}
+
+function setRegion(r) {
+  regionFilter = r;
+  document.getElementById("sbRegion").textContent = "Region: " + r;
+  renderRegionTabs();
+  poll();
+}
+
+// ─── GRAPH ───
+const canvas = document.getElementById("graphCanvas");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas() {
+  const wrap = document.getElementById("graphWrap");
+  canvasW = wrap.clientWidth; canvasH = wrap.clientHeight;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = canvasW * dpr; canvas.height = canvasH * dpr;
+  canvas.style.width = canvasW + "px"; canvas.style.height = canvasH + "px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+function computeGraph() {
+  const old = {}; graphNodes.forEach(n => old[n.id] = n);
+  const cx = canvasW/2, cy = canvasH/2;
+  graphNodes = news.slice(0, 50).map((n, i) => {
+    const prev = old[n.id];
+    const cat = CATS[n.cat] || CATS.CONFLICT;
+    const angle = (i / Math.max(news.length, 1)) * Math.PI * 2;
+    const rad = Math.min(canvasW, canvasH) * 0.3;
+    return { ...n, x: prev?.x ?? cx + Math.cos(angle)*rad + (Math.random()-.5)*50, y: prev?.y ?? cy + Math.sin(angle)*rad + (Math.random()-.5)*50, vx: prev?.vx*.4 ?? 0, vy: prev?.vy*.4 ?? 0, r: 5 + (n.impact||5)*1.8, color: cat.color, catLabel: cat.label };
+  });
+  graphEdges = [];
+  for (let i = 0; i < graphNodes.length; i++) {
+    for (let j = i+1; j < graphNodes.length; j++) {
+      const a = graphNodes[i], b = graphNodes[j];
+      let s = 0;
+      if (a.cat === b.cat) s += 0.5;
+      if (a.connections?.includes(b.cat)) s += 0.5;
+      if (b.connections?.includes(a.cat)) s += 0.5;
+      if (s > 0) graphEdges.push({ i, j, s: Math.min(s, 1) });
+    }
+  }
+  document.getElementById("sbNodes").textContent = graphNodes.length + " nodes · " + graphEdges.length + " edges";
+}
+
+// Zoom
+canvas.addEventListener("wheel", e => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  const oldZ = view.zoom;
+  view.zoom = Math.max(0.2, Math.min(6, view.zoom * (e.deltaY > 0 ? 0.9 : 1.1)));
+  view.x = mx - (mx - view.x) * (view.zoom / oldZ);
+  view.y = my - (my - view.y) * (view.zoom / oldZ);
+}, { passive: false });
+
+// Pan
+canvas.addEventListener("mousedown", e => { if (e.button===1||e.button===2||e.shiftKey) drag = {on:true,lx:e.clientX,ly:e.clientY}; });
+window.addEventListener("mousemove", e => { if(drag.on){view.x+=e.clientX-drag.lx;view.y+=e.clientY-drag.ly;drag.lx=e.clientX;drag.ly=e.clientY;} });
+window.addEventListener("mouseup", () => drag.on = false);
+canvas.addEventListener("contextmenu", e => e.preventDefault());
+
+// Click
+canvas.addEventListener("click", e => {
+  if (e.button!==0||e.shiftKey) return;
+  const rect = canvas.getBoundingClientRect();
+  const wx = (e.clientX-rect.left-view.x)/view.zoom, wy = (e.clientY-rect.top-view.y)/view.zoom;
+  for (let i = graphNodes.length-1; i >= 0; i--) {
+    const n = graphNodes[i], dx = wx-n.x, dy = wy-n.y;
+    if (dx*dx+dy*dy < (n.r+10)**2) { selectNode(n.id); return; }
+  }
+  deselect();
+});
+
+canvas.addEventListener("mousemove", e => {
+  const rect = canvas.getBoundingClientRect();
+  const wx = (e.clientX-rect.left-view.x)/view.zoom, wy = (e.clientY-rect.top-view.y)/view.zoom;
+  hover = null;
+  for (let i = graphNodes.length-1; i >= 0; i--) {
+    const n = graphNodes[i], dx = wx-n.x, dy = wy-n.y;
+    if (dx*dx+dy*dy < (n.r+10)**2) { hover = n.id; break; }
+  }
+  canvas.style.cursor = hover ? "pointer" : "crosshair";
+});
+
+function drawGraph() {
+  if (activeTab !== "graph") { frameId = requestAnimationFrame(drawGraph); return; }
+  ctx.clearRect(0,0,canvasW,canvasH);
+  ctx.save(); ctx.translate(view.x,view.y); ctx.scale(view.zoom,view.zoom);
+
+  // Grid
+  const gs=50; ctx.strokeStyle="#141428"; ctx.lineWidth=.5/view.zoom;
+  const sx=Math.floor(-view.x/view.zoom/gs)*gs-gs, sy=Math.floor(-view.y/view.zoom/gs)*gs-gs;
+  const ex=sx+canvasW/view.zoom+gs*2, ey=sy+canvasH/view.zoom+gs*2;
+  for(let x=sx;x<ex;x+=gs){ctx.beginPath();ctx.moveTo(x,sy);ctx.lineTo(x,ey);ctx.stroke();}
+  for(let y=sy;y<ey;y+=gs){ctx.beginPath();ctx.moveTo(sx,y);ctx.lineTo(ex,y);ctx.stroke();}
+
+  const N = graphNodes;
+  if (N.length) {
+    // Physics
+    for(let i=0;i<N.length;i++) for(let j=i+1;j<N.length;j++){
+      let dx=N[j].x-N[i].x,dy=N[j].y-N[i].y,d2=Math.max(dx*dx+dy*dy,10),d=Math.sqrt(d2),f=2500/d2;
+      N[i].vx-=(dx/d)*f;N[i].vy-=(dy/d)*f;N[j].vx+=(dx/d)*f;N[j].vy+=(dy/d)*f;
+    }
+    graphEdges.forEach(e=>{const a=N[e.i],b=N[e.j];if(!a||!b)return;let dx=b.x-a.x,dy=b.y-a.y;const d=Math.sqrt(dx*dx+dy*dy)||1,f=(d-130)*.004*e.s;a.vx+=(dx/d)*f;a.vy+=(dy/d)*f;b.vx-=(dx/d)*f;b.vy-=(dy/d)*f;});
+    const gcx=canvasW/2/view.zoom-view.x/view.zoom, gcy=canvasH/2/view.zoom-view.y/view.zoom;
+    N.forEach(n=>{n.vx+=(gcx-n.x)*.0004;n.vy+=(gcy-n.y)*.0004;n.vx*=.89;n.vy*=.89;n.x+=n.vx;n.y+=n.vy;});
+
+    // Edges
+    graphEdges.forEach(e=>{const a=N[e.i],b=N[e.j];if(!a||!b)return;const isSel=selected&&(a.id===selected||b.id===selected);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=isSel?"#fff":a.color;ctx.globalAlpha=isSel?.5:.05+e.s*.1;ctx.lineWidth=(isSel?2:.5+e.s)/Math.max(view.zoom,.5);ctx.stroke();ctx.globalAlpha=1;});
+
+    // Nodes
+    N.forEach(n=>{
+      const isSel=n.id===selected, isHov=n.id===hover, hi=isSel||isHov;
+      const g=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r*(hi?4:3));
+      g.addColorStop(0,n.color+(hi?"55":"22"));g.addColorStop(1,n.color+"00");
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r*(hi?4:3),0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle=n.color+(hi?"ff":"cc");ctx.fill();
+      if(isSel){ctx.strokeStyle="#fff";ctx.lineWidth=2.5/view.zoom;ctx.stroke();}
+      const hasEdge=graphEdges.some(e=>N[e.i]?.id===n.id||N[e.j]?.id===n.id);
+      if(!hasEdge){ctx.setLineDash([2,2]);ctx.strokeStyle=n.color+"40";ctx.lineWidth=1/view.zoom;ctx.beginPath();ctx.arc(n.x,n.y,n.r+6,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
+      const fs=Math.max(5,8/Math.max(view.zoom,.6));
+      ctx.font=`${hi?"600":"400"} ${fs}px 'IBM Plex Mono',monospace`;ctx.fillStyle=hi?"#c0c0dd":"#50506a";ctx.textAlign="center";
+      ctx.fillText(n.title.length>35?n.title.slice(0,35)+"…":n.title,n.x,n.y+n.r+fs+4);
+      ctx.font=`bold ${Math.max(4,6/Math.max(view.zoom,.6))}px 'IBM Plex Mono',monospace`;ctx.fillStyle=n.color+"80";ctx.fillText(n.catLabel,n.x,n.y-n.r-5);
+    });
+  }
+  ctx.restore();
+  frameId = requestAnimationFrame(drawGraph);
+}
+
+// ─── SELECTION & POPUP ───
+let selectedUrl = "";
+function selectNode(id) {
+  selected = id; expanded = null;
+  const item = news.find(n => n.id === id);
+  const pop = document.getElementById("npop");
+  if (item) {
+    const cat = CATS[item.cat]||CATS.CONFLICT;
+    pop.classList.add("vis");
+    document.getElementById("npCat").innerHTML = `<span style="color:${cat.color}">${cat.icon} ${cat.label} · IMPACT ${item.impact||"?"}/10</span>`;
+    document.getElementById("npTitle").textContent = item.title;
+    document.getElementById("npSummary").textContent = item.summary || "";
+    document.getElementById("npMeta").textContent = `${item.source} · ${item.region} · ${timeAgo(item.ts)}`;
+    const srcBtn = document.getElementById("npSource");
+    if (item.url) { srcBtn.style.display = ""; selectedUrl = item.url; } else { srcBtn.style.display = "none"; }
+    if (item.connections?.length) {
+      document.getElementById("npConns").innerHTML = '<span style="font:300 6px/1 var(--mono);color:var(--tx4)">CONNECTED → </span>' + item.connections.map(c=>`<span style="font:400 7px/1 var(--mono);color:${CATS[c]?.color||"#888"};margin-left:5px">${CATS[c]?.label||c}</span>`).join("");
+      document.getElementById("npConns").style.display = "";
+    } else document.getElementById("npConns").style.display = "none";
+  }
+  render();
+}
+function deselect() { selected = null; document.getElementById("npop").classList.remove("vis"); render(); }
+function openSource() { if (selectedUrl) window.open(selectedUrl, "_blank", "noopener"); }
+
+// ─── FEED RENDER ───
+function timeAgo(ts) {
+  if (!ts) return "?";
+  const m = Math.floor((Date.now() - ts) / 60000);
+  if (m < 1) return "Just now";
+  if (m < 60) return m + "m ago";
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + "h ago";
+  return Math.floor(h / 24) + "d ago";
+}
+
+function render() {
+  // Heatmap
+  const hm = document.getElementById("heatmap");
+  const max = Math.max(1, ...CAT_KEYS.map(k => news.filter(n => n.cat === k).length));
+  hm.style.gridTemplateColumns = `repeat(${CAT_KEYS.length},1fr)`;
+  hm.innerHTML = CAT_KEYS.map(k => {
+    const c = news.filter(n => n.cat === k).length;
+    return `<div class="hm-c" style="background:${CATS[k].color};opacity:${(.12+(c/max)*.75).toFixed(2)}">${c}</div>`;
+  }).join("");
+
+  document.getElementById("feedLbl").textContent = `${regionFilter.toUpperCase()} FEED — ${news.length} ITEMS`;
+
+  // Feed list
+  const list = document.getElementById("feedList");
+  let h = "";
+  news.forEach(n => {
+    const cat = CATS[n.cat] || CATS.CONFLICT;
+    const isSel = selected === n.id;
+    const isExp = expanded === n.id;
+    h += `<div class="ncard${isSel?" sel":""}" style="border-left:3px solid ${cat.color}" onclick="cardClick('${n.id}')">`;
+    h += `<div class="ncard-top"><span class="ncard-cat" style="color:${cat.color}">${cat.icon} ${cat.label}</span><span class="ncard-time">${timeAgo(n.ts)}</span></div>`;
+    h += `<div class="ncard-title">${n.title}</div>`;
+    h += `<div class="ncard-bot"><span class="ncard-src">${n.source||"?"}</span><div class="pips">`;
+    for (let i=0;i<10;i++) h+=`<div class="pip" style="background:${i<(n.impact||5)?cat.color:"#1a1a2e"};opacity:${i<(n.impact||5)?.8:.2}"></div>`;
+    h += `</div></div>`;
+    if (isExp) {
+      h += `<div class="ncard-exp"><div class="ncard-summary">${n.summary||"No summary available."}</div><div class="ncard-actions">`;
+      if (n.url) h += `<button class="btn-source" onclick="event.stopPropagation();window.open('${n.url.replace(/'/g,"\\'")}','_blank','noopener')">↗ SOURCE</button>`;
+      (n.connections||[]).forEach(c => { const cc = CATS[c]; if(cc) h += `<span class="conn-tag" style="color:${cc.color};border:1px solid ${cc.color}30">${cc.label}</span>`; });
+      h += `</div></div>`;
+    } else if (isSel) {
+      h += `<div class="ncard-hint">click again to expand</div>`;
+    }
+    h += `</div>`;
+  });
+  list.innerHTML = h;
+
+  // Stats
+  document.getElementById("sI").textContent = news.length;
+  document.getElementById("sS").textContent = new Set(news.map(n=>n.source)).size;
+  document.getElementById("sA").textContent = news.length ? (news.reduce((s,n)=>s+(n.impact||5),0)/news.length).toFixed(1) : "—";
+  document.getElementById("sR").textContent = new Set(news.map(n=>n.region)).size;
+}
+
+function cardClick(id) {
+  if (selected === id && expanded !== id) { expanded = id; }
+  else if (expanded === id) { expanded = null; selected = null; }
+  else { selected = id; expanded = null; }
+  render();
+}
+
+// ─── TAB SWITCHING ───
+function setTab(btn) {
+  document.querySelectorAll(".ctab").forEach(b => b.classList.remove("on"));
+  btn.classList.add("on");
+  activeTab = btn.dataset.tab;
+  document.getElementById("graphWrap").style.display = activeTab === "graph" ? "" : "none";
+  const ap = document.getElementById("analysisPanel");
+  activeTab === "summary" ? ap.classList.add("vis") : ap.classList.remove("vis");
+}
+
+// ─── CRAWL TOGGLE ───
+function toggleCrawl() {
+  crawlActive = !crawlActive;
+  const btn = document.getElementById("btnPause");
+  btn.textContent = crawlActive ? "■ PAUSE" : "▶ RESUME";
+  btn.className = crawlActive ? "btn-sm" : "btn-sm off";
+  document.getElementById("sbDot").style.background = crawlActive ? "var(--green)" : "var(--tx4)";
+  document.getElementById("sbCrawl").textContent = crawlActive ? "CRAWL 30s" : "PAUSED";
+  document.getElementById("liveDot").style.animationPlayState = crawlActive ? "running" : "paused";
+}
+
+// ─── AI ACTIONS (Puter.js client-side = free, no API key needed) ───
+async function puterAI(prompt) {
+  try {
+    const resp = await puter.ai.chat(prompt, { model: "x-ai/grok-4-1-fast" });
+    if (resp?.message?.content) return resp.message.content;
+    if (typeof resp === "string") return resp;
+    return resp?.toString() || null;
+  } catch (e) {
+    console.log("Puter AI error:", e.message, "— trying server fallback");
+    return null;
+  }
+}
+
+async function runSummary() {
+  document.getElementById("anaText").innerHTML = '<span style="color:var(--accent)">▓▓▓░░░░░░░ Connecting to Grok AI via Puter.js...\n▓▓▓▓▓░░░░ Analyzing intelligence items...\n▓▓▓▓▓▓▓░░ Building briefing...</span>';
+  
+  const headlines = news.slice(0, 20).map(n => `[${n.cat}] ${n.title} — ${n.source}`).join("\n");
+  const regionLabel = regionFilter === "All" ? "all regions" : regionFilter;
+  
+  // Try Puter.js first (free, client-side)
+  let result = await puterAI(
+    `You are a senior intelligence analyst. Region focus: ${regionLabel}.\n\nCurrent tracked news:\n${headlines}\n\nProvide:\n1. SITUATION SUMMARY — comprehensive overview for someone who hasn't checked in 24h\n2. NEW DEVELOPMENTS — what changed in last hours\n3. HOW EVENTS CONNECT — cascade chains and escalation patterns\n4. KEY TAKEAWAYS — 5 critical points\n\nBe specific, cite actual events. Professional intel briefing. No markdown.`
+  );
+  
+  // Fallback to server API if Puter fails
+  if (!result) {
+    const data = await api("/api/ai/summary", { method: "POST", body: JSON.stringify({ region: regionFilter }) });
+    result = data?.text;
+  }
+  
+  document.getElementById("anaText").textContent = result || "AI unavailable. A Puter.js sign-in popup may appear — allow it to enable free AI.";
+}
+
+async function runPredict() {
+  document.getElementById("predPh").style.display = "none";
+  const pt = document.getElementById("predText"); pt.style.display = "";
+  pt.innerHTML = '<span style="color:var(--purple)">▓▓▓▓░░░░░░ Connecting to Grok AI via Puter.js...\n▓▓▓▓▓▓░░░░ Building scenario models...\n▓▓▓▓▓▓▓░░░ Computing probabilities...</span>';
+  
+  const headlines = news.slice(0, 20).map(n => `[${n.cat}|${n.region}] ${n.title} (impact:${n.impact})`).join("\n");
+  
+  let result = await puterAI(
+    `You are a geopolitical forecasting analyst. Based on these tracked events:\n\n${headlines}\n\nProvide a STRUCTURED prediction:\n\n▸ SHORT-TERM (48-72h)\n- Military:\n- Diplomatic:\n- Energy/Markets (specific prices):\n\n▸ MEDIUM-TERM (1-2 weeks)\n- Escalation trajectory:\n- Economic cascade (oil, stocks, currencies):\n- Humanitarian:\n\n▸ SCENARIO MATRIX\n- Scenario A [%]: [name] — [desc]\n- Scenario B [%]: [name] — [desc]\n- Scenario C [%]: [name] — [desc]\n\n▸ WILDCARDS\n- 3 black swan events\n\n▸ CONFIDENCE: [level + reasoning]\n\nBe specific with numbers, names, dates. No markdown.`
+  );
+  
+  if (!result) {
+    const data = await api("/api/ai/predict", { method: "POST", body: JSON.stringify({ region: regionFilter }) });
+    result = data?.text;
+  }
+  
+  pt.textContent = result || "AI unavailable. A Puter.js sign-in popup may appear — allow it to enable free AI.";
+}
+
+// ─── INIT ───
+function init() {
+  resizeCanvas();
+  window.addEventListener("resize", () => { resizeCanvas(); computeGraph(); });
+
+  // Legend
+  document.getElementById("legend").innerHTML = Object.entries(CATS).map(([k,v]) =>
+    `<div class="g-leg"><div class="g-dot" style="background:${v.color}"></div><span style="font:300 6px/1 var(--mono);color:var(--tx4)">${v.label}</span></div>`
+  ).join("");
+
+  renderRegionTabs();
+  loadTopics();
+  startPolling();
+  drawGraph();
+
+  // Clock
+  setInterval(() => {
+    document.getElementById("crawlStatus").textContent = crawlActive ? "● LIVE" : "";
+  }, 1000);
+}
+
+init();
+</script>
+</body>
+</html>
